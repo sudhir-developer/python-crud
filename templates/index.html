@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+
+
+            <h1>Welcome {{name}} 🚀</h1>
+            <p>You are {{ age }} years old.</p>
+            <h1>Product List</h1>
+            <ul>
+                {% for item in products %}
+                <li>{{item}}</li>
+                {% endfor %}
+            </ul>
+
+            {% if age >= 18 %}
+            <p>You are an adult</p>
+            {% else %}
+            <p>You are an minor</p>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

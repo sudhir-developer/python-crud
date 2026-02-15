@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h1>Registration Successful 🎉</h1>
+    <a href="/register">Register Another User</a>
+
+    <h2>All Registered Users</h2>
+
+    <table class="table table-borderd">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Action</th>
+        </tr>
+
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.age }}</td>
+            <td><a href="/delete_user/{{ user.id }}" class="btn btn-outline-danger">Delete</a></td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</div>
+
+{% endblock %}
