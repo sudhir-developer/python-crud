@@ -1,4 +1,4 @@
-
+from fastapi import Path
 from fastapi.responses import RedirectResponse
 from fastapi.responses import JSONResponse
 from database import engine, SessionLocal
@@ -77,6 +77,21 @@ def register_user(name: str = Form(...), age: int = Form(...)):
 
     return RedirectResponse(url="/success", status_code=303)
 
+@app.get("/delete_user/{user_id}")
+def delete_user(user_id: int = Path(..., description="ID of the user to delete")):
+    db: Session = SessionLocal()
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if user:
+        db.delete(user)
+        db.commit()
+        message = f"User {user.name} deleted successfully."
+    else:
+        message = "User not found."
+
+    db.close()
+    # Redirect back to success page to see updated list
+    return RedirectResponse(url="/success", status_code=303)
 
 
 @app.get("/users")

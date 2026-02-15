@@ -9,7 +9,7 @@
 
     <table class="table table-borderd">
         <tr>
-            <th>ID</th>
+            <th>Sr.No</th>
             <th>Name</th>
             <th>Age</th>
             <th>Action</th>
@@ -17,7 +17,7 @@
 
         {% for user in users %}
         <tr>
-            <td>{{ user.id }}</td>
+            <td>{{ loop.index }}</td>
             <td>{{ user.name }}</td>
             <td>{{ user.age }}</td>
             <td><a href="/delete_user/{{ user.id }}" class="btn btn-outline-danger">Delete</a></td>
