@@ -93,6 +93,33 @@ def delete_user(user_id: int = Path(..., description="ID of the user to delete")
     # Redirect back to success page to see updated list
     return RedirectResponse(url="/success", status_code=303)
 
+@app.get("/update_user/{user_id}", response_class=HTMLResponse)
+def show_update_form(request: Request, user_id: int):
+    db: Session = SessionLocal()
+    user = db.query(User).filter(User.id == user_id).first()
+    db.close()
+
+    if not user:
+        return HTMLResponse(content="User not found", status_code=404)
+
+    return templates.TemplateResponse("update_user.html", {
+        "request": request,
+        "title": "Update User",
+        "user": user
+    })
+    
+@app.post("/update_user/{user_id}")
+def update_user(user_id: int, name: str = Form(...), age: int = Form(...)):
+    db: Session = SessionLocal()
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if user:
+        user.name = name
+        user.age = age
+        db.commit()
+
+    db.close()
+    return RedirectResponse(url="/success", status_code=303)
 
 @app.get("/users")
 def get_users():
