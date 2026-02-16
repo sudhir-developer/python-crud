@@ -9,6 +9,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi import Form
+from fastapi import UploadFile, File
+import shutil
+import os
 app = FastAPI()
 User.metadata.create_all(bind=engine)
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -65,12 +68,25 @@ def success_page(request: Request):
         "users": users
     })
 
-@app.post("/register")
-def register_user(name: str = Form(...), age: int = Form(...)):
+UPLOAD_DIR = "static/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+@app.post("/register")
+def register_user(
+    name: str = Form(...),
+    age: int = Form(...),
+    profile_pic: UploadFile = File(None)
+):
     db: Session = SessionLocal()
 
-    new_user = User(name=name, age=age)
+    filename = "default.png"
+    if profile_pic:
+        filename = f"{name}_{profile_pic.filename}"
+        file_path = os.path.join(UPLOAD_DIR, filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(profile_pic.file, buffer)
+
+    new_user = User(name=name, age=age, profile_pic=filename)
     db.add(new_user)
     db.commit()
     db.close()
@@ -107,15 +123,31 @@ def show_update_form(request: Request, user_id: int):
         "title": "Update User",
         "user": user
     })
-    
+
 @app.post("/update_user/{user_id}")
-def update_user(user_id: int, name: str = Form(...), age: int = Form(...)):
+def update_user(
+    user_id: int,
+    name: str = Form(...),
+    age: int = Form(...),
+    profile_pic: UploadFile = File(None)
+):
     db: Session = SessionLocal()
     user = db.query(User).filter(User.id == user_id).first()
 
     if user:
         user.name = name
         user.age = age
+
+        # If new image uploaded
+        if profile_pic and profile_pic.filename != "":
+            filename = f"{name}_{profile_pic.filename}"
+            file_path = os.path.join("static/uploads", filename)
+
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(profile_pic.file, buffer)
+
+            user.profile_pic = filename  # Update DB column
+
         db.commit()
 
     db.close()
@@ -133,7 +165,8 @@ def get_users():
         user_list.append({
             "id": user.id,
             "name": user.name,
-            "age": user.age
+            "age": user.age,
+            "image_url": f"/static/uploads/{user.profile_pic}"
         })
 
     return JSONResponse(content=user_list)
