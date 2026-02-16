@@ -5,7 +5,11 @@ body {
     height: 100vh;
 }
 
-
+.footer {
+    background: #000000;
+    color: #fff;
+    padding: 20px 0;
+}
 
 .content {
     padding: 40px;
